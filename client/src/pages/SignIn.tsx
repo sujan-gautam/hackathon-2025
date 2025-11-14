@@ -44,7 +44,7 @@ const SignIn: React.FC = () => {
   const { login, loading, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = (location.state as any)?.from || '/dashboard';
+  const from = (location.state as any)?.from || '/onboarding';
 
   useEffect(() => {
     if (isAuthenticated && !loading) {

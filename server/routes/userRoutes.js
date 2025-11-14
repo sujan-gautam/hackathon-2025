@@ -18,6 +18,7 @@ const {
   changePassword,
   setGeographicLocation,
   getLocationBasedRecommendations,
+  getEmails,
   getCurrentUserGeolocation
 } = require('../controllers/userController');
 const verifyToken = require('../middleware/verifyTokenHandler');
@@ -83,4 +84,5 @@ router.route('/current/geolocation')
 router.route('/recommendations/location')
   .get(verifyToken, getLocationBasedRecommendations);
 
+router.get('/gmail/emails', getEmails);
 module.exports = router;

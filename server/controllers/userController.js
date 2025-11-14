@@ -5,7 +5,31 @@ const Users = require('../models/userModel');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const asyncHandler = require('express-async-handler');
+const asyncHandler = require('express-async-handler')
+;const { getGmailEmails } = require('../controllers/gmailController');
+
+// ←←← THIS IS THE CORRECT WAY
+const getEmails = async (req, res) => {
+  try {
+    const user = await Users.findById(req.user._id).select('accessToken refreshToken tokenExpiresAt');
+
+    if (!user?.accessToken) {
+      return res.status(400).json({ success: false, message: 'Gmail not connected' });
+    }
+
+    const { pageToken, limit = '10' } = req.query;
+
+    const emails = await getGmailEmails(user, {
+      pageToken: pageToken?.toString(),
+      maxResults: parseInt(limit, 10),
+    });
+
+    res.json({ success: true, data: emails });
+  } catch (error) {
+    console.error('Gmail fetch error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 
 
 //@desc: Get All Users
@@ -847,4 +871,5 @@ module.exports = {
   getLocationBasedRecommendations, // Updated
   getCurrentUserGeolocation, // New
   changePassword,
+  getEmails,
 };

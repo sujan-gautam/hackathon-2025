@@ -18,6 +18,7 @@ import Settings from "./pages/settings";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import Onboarding from "./pages/Onboarding";
+import GmailInbox from "./pages/GmailInbox";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ const App = () => (
              <Route path="/dashboard" element={<Dashboard/>}></Route>
              <Route path="/settings" element={<Settings/>}></Route>
              <Route path="/onboarding" element={<Onboarding/>}></Route>
+             <Route path="/gmail" element={<GmailInbox/>}></Route>
           </Routes>
         </AuthProvider>
       </BrowserRouter>

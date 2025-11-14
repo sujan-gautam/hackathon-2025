@@ -5,11 +5,18 @@ const asyncHandler = require('express-async-handler');
 
 const router = express.Router();
 
-// Initiate Google OAuth
+// Initiate Google OAuth WITH GMAIL SCOPES
 router.get(
   '/google',
   passport.authenticate('google', {
-    scope: ['profile', 'email'],
+    scope: [
+      'profile',
+      'email',
+      'https://www.googleapis.com/auth/gmail.readonly',
+      'https://www.googleapis.com/auth/gmail.send',
+    ],
+    accessType: 'offline',
+    prompt: 'consent',
   })
 );
 
@@ -29,11 +36,11 @@ router.get(
           id: user.id,
         },
       },
-      process.env.SECRECT_KEY, 
+      process.env.SECRECT_KEY,
       { expiresIn: '7d' }
     );
 
-    const frontendURL = process.env.FRONTEND_APP_URL ;
+    const frontendURL = process.env.FRONTEND_APP_URL;
     res.redirect(`${frontendURL}/auth/google/callback?token=${accessToken}`);
   })
 );

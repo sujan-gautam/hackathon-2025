@@ -11,6 +11,7 @@ const fs = require('fs');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const onboardingRoutes = require('./routes/onboardingRoutes');
+const verifyToken = require('./middleware/verifyTokenHandler');
 
 // Load environment variables
 dotenv.config();
@@ -69,7 +70,7 @@ const serveWithFallback = (urlPath, folderPath, fallbackFile) => {
 
 
 
-app.use('/api/users', userRoutes);
+app.use('/api/users',verifyToken, userRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/onboarding',onboardingRoutes);
 

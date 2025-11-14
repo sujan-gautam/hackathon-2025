@@ -51,69 +51,35 @@ const userSchema = new mongoose.Schema({
     },
   },
 
-  website: {
-    type: String,
-    required: false,
-  },
-  bio: {
-    type: String,
-    required: false,
-  },
+  website: { type: String, required: false },
+  bio: { type: String, required: false },
 
-  // new email Automation onboarding fields
-  senderName: {
-    type: String,
-    default: "",
-  },
-  senderEmail: {
-    type: String,
-    default: "",
-  },
-  brandName: {
-    type: String,
-    default: "",
-  },
-  brandDescription: {
-    type: String,
-    default: "",
-  },
+  // Email Automation Onboarding
+  senderName: { type: String, default: "" },
+  senderEmail: { type: String, default: "" },
+  brandName: { type: String, default: "" },
+  brandDescription: { type: String, default: "" },
+  automationGoals: { type: [String], default: [] },
+  emailTone: { type: String, default: "" },
+  emailFrequency: { type: String, default: "" },
 
-  automationGoals: {
-    type: [String],
-    default: [],
-  },
+  followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
 
-  emailTone: {
-    type: String,
-    default: "",
-  },
+  resetPasswordToken: { type: String, default: null },
+  resetPasswordExpires: { type: Date, default: null },
 
-  emailFrequency: {
-    type: String,
-    default: "",
-  },
-  // ============================
-
-  followers: [
-    { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
-  ],
-
-  resetPasswordToken: {
-    type: String,
-    default: null,
-  },
-  resetPasswordExpires: {
-    type: Date,
-    default: null,
-  },
-
+  // GMAIL OAUTH TOKENS - NEW
+  accessToken: { type: String, default: null },
+  refreshToken: { type: String, default: null },
+  tokenExpiresAt: { type: Date, default: null },
+  tokenScope: { type: [String], default: [] },
 }, {
   timestamps: true,
 });
 
 userSchema.index({ geoLocation: '2dsphere' });
 
-// Pre-save hook
+// Pre-save: hash password + clean geoLocation
 userSchema.pre('save', async function (next) {
   try {
     if (this.isModified('password') && this.password && !this.password.startsWith('$2b$')) {
