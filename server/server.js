@@ -8,9 +8,15 @@ const cors = require('cors');
 const session = require('express-session');
 const passport = require('passport');
 const fs = require('fs');
+
+// Routes
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const onboardingRoutes = require('./routes/onboardingRoutes');
+const gmailRoutes = require('./routes/gmailRoutes');
+const aiProcessorRoutes = require('./routes/aiProcessorRoutes');
+
+// Middleware
 const verifyToken = require('./middleware/verifyTokenHandler');
 
 // Load environment variables
@@ -22,12 +28,11 @@ connectDB();
 // Register Mongoose models
 require('./models/userModel');
 
-// Passport config (Google login, etc.)
+// Passport config
 require('./config/passport')();
 
 const app = express();
 const server = http.createServer(app);
-
 
 // Middleware
 app.use(express.json());
@@ -39,8 +44,8 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'x-api-key', 'Authorization', 'session_logininfo'],
 }));
-app.options(/.*/, cors());
 
+app.options(/.*/, cors());
 
 // Session & passport
 app.use(session({
@@ -48,10 +53,12 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
 }));
+
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Static file serving with per-folder fallback
+
+// Utility: Serve static folders with fallback
 const serveWithFallback = (urlPath, folderPath, fallbackFile) => {
   app.use(urlPath, express.static(folderPath));
 
@@ -69,36 +76,48 @@ const serveWithFallback = (urlPath, folderPath, fallbackFile) => {
 };
 
 
-
-app.use('/api/users',verifyToken, userRoutes);
+// API Routes
+app.use('/api/users', verifyToken, userRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/onboarding',onboardingRoutes);
+app.use('/api/onboarding', onboardingRoutes);
+app.use('/api/gmail', verifyToken, gmailRoutes);
+app.use('/api/ai/process', verifyToken, aiProcessorRoutes);
 
-// Health check and root
+// Health check endpoints
 app.get('/', (req, res) => res.send('Server is up and running!'));
 app.get('/health', (req, res) => res.status(200).json({ status: 'ok', uptime: process.uptime() }));
 
-// Error handling
+
+// Error handling middleware
 app.use((err, req, res, next) => {
   const statusCode = res.statusCode !== 200 ? res.statusCode : 500;
-  console.error('Error middleware:', { message: err.message, statusCode, stack: err.stack });
+
+  console.error('Error middleware:', {
+    message: err.message,
+    statusCode,
+    stack: err.stack,
+  });
+
   res.status(statusCode).json({
     message: err.message,
     stack: process.env.NODE_ENV === 'production' ? null : err.stack,
   });
 });
 
-// Catch unhandled promises and exceptions
+
+// Handle unhandled errors
 process.on('unhandledRejection', (err) => console.error('Unhandled Rejection:', err));
 process.on('uncaughtException', (err) => console.error('Uncaught Exception:', err));
+
 
 // Start server
 const HOST = '0.0.0.0';
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, HOST, () => console.log(`App is running on port: ${PORT}`));
 
-// Export server and getIO for use in other modules
-module.exports = {
-  server,
-  getIO,
-};
+server.listen(PORT, HOST, () => {
+  console.log(`App is running on port: ${PORT}`);
+});
+
+
+// Export ONLY the server
+module.exports = { server };

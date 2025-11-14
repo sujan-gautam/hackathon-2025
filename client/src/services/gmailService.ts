@@ -22,12 +22,12 @@ export interface GmailResponse {
 export const getGmailEmails = async (
   options: { pageToken?: string; limit?: number } = {}
 ): Promise<GmailResponse> => {
-  return fetchAPI<GmailResponse>('users/gmail/emails', {
+  return fetchAPI<GmailResponse>('/gmail/emails', {
     method: 'GET',
     params: options,
   });
 };
 
 export const getEmailById = async (emailId: string): Promise<GmailMessage> => {
-  return fetchAPI<GmailMessage>(`users/gmail/emails/${emailId}`);
+  return fetchAPI<GmailMessage>(`/gmail/emails/${emailId}`);
 };
